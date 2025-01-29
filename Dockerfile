@@ -14,6 +14,8 @@ WORKDIR /app
 
 # Copy the Python script
 COPY ffmpeg_manager.py .
+COPY .env .
+
 
 # Set default environment variables
 ENV ENV_INPUT_STREAM="rtsp://your_input_stream"
