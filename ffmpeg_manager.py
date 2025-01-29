@@ -7,12 +7,13 @@ from dotenv import load_dotenv  # Import load_dotenv
 
 
 class BackgroundProcessManager:
-    def __init__(self, command_template, input_stream, output_stream):
+    def __init__(self, command_template):
         self.command_template = command_template
-        self.input_stream = input_stream
-        self.output_stream = output_stream
         self.process = None
         self.timer = None
+        load_dotenv()
+        self.input_stream = os.environ.get("ENV_INPUT_STREAM")
+        self.output_stream = os.environ.get("ENV_OUTPUT_STREAM")
 
     def _run_command(self):
         """Runs the command in the background."""
@@ -69,13 +70,8 @@ class BackgroundProcessManager:
 if __name__ == "__main__":
     # Example usage:
     command_template = "ffmpeg -rtsp_transport tcp -i %(ENV_INPUT_STREAM)s -f flv -c:v copy -c:a copy %(ENV_OUTPUT_STREAM)s"
-    load_dotenv()
-    # Get the environment variables or use defaults.
-    input_stream = os.environ.get("ENV_INPUT_STREAM", "rtsp://your_input_stream")
-    output_stream = os.environ.get("ENV_OUTPUT_STREAM", "rtmp://your_output_stream")
 
-
-    manager = BackgroundProcessManager(command_template, input_stream, output_stream)
+    manager = BackgroundProcessManager(command_template)
     manager.start()
 
     try:
