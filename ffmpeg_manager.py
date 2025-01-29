@@ -58,6 +58,7 @@ class BackgroundProcessManager:
         self._run_command()
         self.timer = threading.Timer(900, self._restart_command)
         self.timer.start()
+        now = datetime.now()
         formatted_datetime = now.strftime("%Y-%m-%d %H:%M:%S")
         print(f"Starting again - {formatted_datetime}", flush=True)
 
