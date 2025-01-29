@@ -18,8 +18,7 @@ COPY .env .
 
 
 # Set default environment variables
-ENV ENV_INPUT_STREAM="rtsp://your_input_stream"
-ENV ENV_OUTPUT_STREAM="rtmp://your_output_stream"
+ENV PYTHONUNBUFFERED=1
 
 # Command to run when the container starts
-CMD ["python", "ffmpeg_manager.py"]
+CMD ["python", "-u", "ffmpeg_manager.py"]

@@ -3,7 +3,8 @@ import time
 import os
 import signal
 import threading
-from dotenv import load_dotenv  # Import load_dotenv
+from dotenv import load_dotenv
+from datetime import datetime
 
 
 class BackgroundProcessManager:
@@ -13,8 +14,7 @@ class BackgroundProcessManager:
         self.timer = None
         load_dotenv()
         self.input_stream = os.environ.get("ENV_INPUT_STREAM")
-        self.output_stream = os.environ.get("ENV_OUTPUT_STREAM")
-
+        self.output_stream = os.environ.get("ENV_OUTPUT_STREAM")     
     def _run_command(self):
         """Runs the command in the background."""
         command = self.command_template % {
@@ -58,6 +58,10 @@ class BackgroundProcessManager:
         self._run_command()
         self.timer = threading.Timer(900, self._restart_command)
         self.timer.start()
+        formatted_datetime = now.strftime("%Y-%m-%d %H:%M:%S")
+        print(f"Starting again - {formatted_datetime}", flush=True)
+
+
 
     def stop(self):
         """Stops the command and cancels the restart timer."""
