@@ -33,7 +33,7 @@ class BackgroundProcessManager:
         if self.process:
             print(f"Stopping process with PID: {self.process.pid}")
             try:
-                os.killpg(os.getpgid(self.process.pid), signal.SIGTERM) #Try to kill the group first
+                os.killpg(os.getpgid(self.process.pid), signal.SIGKILL) #Try to kill the group first
                 self.process.wait(timeout=15)  # Give it time to exit gracefully
                 print("Process stopped successfully.", flush=True)
 
