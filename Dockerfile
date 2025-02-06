@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN pip install python-dotenv
 
+RUN pip install psutil
+
 # Set the working directory
 WORKDIR /app
 
