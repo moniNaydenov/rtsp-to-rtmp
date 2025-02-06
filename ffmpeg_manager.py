@@ -84,7 +84,7 @@ class BackgroundProcessManager:
 
 if __name__ == "__main__":
     # Example usage:
-    command_template = "ffmpeg -rtsp_transport tcp -i %(ENV_INPUT_STREAM)s -f flv -c:v copy -c:a copy %(ENV_OUTPUT_STREAM)s"
+    command_template = "/usr/bin/ffmpeg -rtsp_transport tcp -i %(ENV_INPUT_STREAM)s -f flv -c:v copy -c:a copy %(ENV_OUTPUT_STREAM)s"
 
     manager = BackgroundProcessManager(command_template)
     manager.start()
