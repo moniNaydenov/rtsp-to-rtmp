@@ -6,6 +6,7 @@ import threading
 from dotenv import load_dotenv
 import psutil  # Import psutil
 from datetime import datetime
+import shlex  # Import shlex
 
 
 class BackgroundProcessManager:
@@ -17,14 +18,21 @@ class BackgroundProcessManager:
         self.input_stream = os.environ.get("ENV_INPUT_STREAM")
         self.output_stream = os.environ.get("ENV_OUTPUT_STREAM")     
     def _run_command(self):
-        command = self.command_template % {
+        command = "/usr/bin/ffmpeg -rtsp_transport tcp -i %(ENV_INPUT_STREAM)s -f flv -c:v copy -c:a copy %(ENV_OUTPUT_STREAM)s"
+        command = command % {
             'ENV_INPUT_STREAM': self.input_stream,
             'ENV_OUTPUT_STREAM': self.output_stream
         }
-        print(f"Running command: {command}", flush=True)
+
+        command_list = shlex.split(command)  # Split the command string into a list
+
+        print(f"Running command: {command}", flush=True)  # Print the command for debugging
+
         try:
-           self.process = subprocess.Popen(command, shell=False, preexec_fn=os.setsid) #shell=False is important
-           print(f"Process started with PID: {self.process.pid}", flush=True)
+            self.process = subprocess.Popen(command_list, shell=False, preexec_fn=os.setsid)  # shell=False, command_list!
+            print(f"Process started with PID: {self.process.pid}", flush=True)
+        except FileNotFoundError as e:  # Catch FileNotFoundError specifically
+            print(f"FFmpeg not found: {e}", flush=True)  # More informative message
         except Exception as e:
             print(f"Error starting process: {e}", flush=True)
 
