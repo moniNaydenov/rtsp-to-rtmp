@@ -4,6 +4,7 @@ import os
 import signal
 import threading
 from dotenv import load_dotenv
+import psutil  # Import psutil
 from datetime import datetime
 
 
@@ -24,29 +25,45 @@ class BackgroundProcessManager:
         print(f"Running command: {command}")
         try:
             self.process = subprocess.Popen(command, shell=True, preexec_fn=os.setsid)
-            print(f"Process started with PID: {self.process.pid}")
+            print(f"Process started with PID: {self.process.pid}", flush=True)
         except Exception as e:
-            print(f"Error starting process: {e}")
+            print(f"Error starting process: {e}", flush=True)
 
     def _stop_command(self):
-        """Stops the background command."""
         if self.process:
             print(f"Stopping process with PID: {self.process.pid}")
             try:
-                os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
-                self.process.wait(timeout=5) # Give it some time to gracefully exit
-                print("Process stopped successfully.")
+                os.killpg(os.getpgid(self.process.pid), signal.SIGTERM) #Try to kill the group first
+                self.process.wait(timeout=15)  # Give it time to exit gracefully
+                print("Process stopped successfully.", flush=True)
+
             except subprocess.TimeoutExpired:
-                print("Process did not terminate gracefully, killing it.")
+                print("Process did not terminate gracefully, killing it.", flush=True)
                 os.killpg(os.getpgid(self.process.pid), signal.SIGKILL)
+            except ProcessLookupError: #Handle the case when group is already killed.
+                print("Process group already killed.", flush=True)
             except Exception as e:
-                print(f"Error stopping process: {e}")
+                print(f"Error stopping process: {e}", flush=True)
             finally:
-                self.process = None
+                self.process = None #Reset the process
+        self._kill_ffmpeg_children() #Kill the remaining children
+
+    def _kill_ffmpeg_children(self):
+        if self.process and self.process.pid:
+            try:
+                parent = psutil.Process(self.process.pid)
+                children = parent.children(recursive=True)  # Get all child processes recursively
+                for child in children:
+                    print(f"Killing child process: {child.pid}", flush=True)
+                    child.kill() #Kill directly
+            except psutil.NoSuchProcess:
+               print("Parent process is not running.", flush=True)
+            except Exception as e:
+                print(f"Error killing child processes: {e}", flush=True)
 
     def _restart_command(self):
         """Stops and restarts the command."""
-        print("Restarting command...")
+        print("Restarting command...", flush=True)
         self._stop_command()
         self._run_command()
         # Reschedule the timer
@@ -69,7 +86,7 @@ class BackgroundProcessManager:
         self._stop_command()
         if self.timer:
             self.timer.cancel()
-        print("Background process manager stopped.")
+        print("Background process manager stopped.", flush=True)
 
 
 if __name__ == "__main__":
@@ -84,5 +101,5 @@ if __name__ == "__main__":
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Keyboard interrupt received. Stopping...")
+        print("Keyboard interrupt received. Stopping...", flush=True)
         manager.stop()
